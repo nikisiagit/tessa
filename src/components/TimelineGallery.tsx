@@ -44,13 +44,23 @@ export default function TimelineGallery({ groupedPhotos, years }: TimelineGaller
                                 return (
                                     <div key={photo.id} className="photo-card" onClick={() => setSelectedPhoto(photo)} role="button" tabIndex={0}>
                                         <picture className="photo-container">
-                                            {/* Fallback to simple img tag for remote iCloud URLs to bypass extra config overhead */}
-                                            <img
-                                                src={photo.url}
-                                                alt={`Photo taken in ${year}`}
-                                                loading="lazy"
-                                                className="photo-img interactive-img"
-                                            />
+                                            {photo.url.includes('.mp4') ? (
+                                                <video
+                                                    src={photo.url}
+                                                    controls
+                                                    muted
+                                                    playsInline
+                                                    className="photo-img interactive-img"
+                                                    style={{ objectFit: 'cover' }}
+                                                />
+                                            ) : (
+                                                <img
+                                                    src={photo.url}
+                                                    alt={`Photo taken in ${year}`}
+                                                    loading="lazy"
+                                                    className="photo-img interactive-img"
+                                                />
+                                            )}
                                         </picture>
                                         <p className="photo-date">
                                             {dateObj.toLocaleDateString('en-US', {
@@ -72,11 +82,21 @@ export default function TimelineGallery({ groupedPhotos, years }: TimelineGaller
                         &times;
                     </button>
                     <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                        <img
-                            src={selectedPhoto.url}
-                            alt="Enlarged view"
-                            className="modal-img"
-                        />
+                        {selectedPhoto.url.includes('.mp4') ? (
+                            <video
+                                src={selectedPhoto.url}
+                                controls
+                                playsInline
+                                className="modal-img"
+                                autoPlay
+                            />
+                        ) : (
+                            <img
+                                src={selectedPhoto.url}
+                                alt="Enlarged view"
+                                className="modal-img"
+                            />
+                        )}
                         <div className="modal-footer">
                             <p className="modal-date">
                                 {new Date(selectedPhoto.date).toLocaleDateString('en-US', {

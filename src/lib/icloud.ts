@@ -58,7 +58,7 @@ export async function getPhotos(streamId: string): Promise<Record<number, Photo[
 
         let maxD = p.derivatives[dKeys[0]];
         for (const k of dKeys) {
-            if (parseInt(p.derivatives[k].width) > parseInt(maxD.width)) {
+            if (parseInt(p.derivatives[k].width, 10) * parseInt(p.derivatives[k].height, 10) > parseInt(maxD.width, 10) * parseInt(maxD.height, 10)) {
                 maxD = p.derivatives[k];
             }
         }
