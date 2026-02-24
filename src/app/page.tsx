@@ -24,7 +24,7 @@ export default async function Home() {
     <main className="container">
       <header className="site-header">
         <h1>tessagram</h1>
-        <p className="subtitle">life diary through photos</p>
+        <p className="subtitle">journey down the memory lane</p>
       </header>
 
       <TimelineGallery groupedPhotos={groupedPhotos} years={years} />

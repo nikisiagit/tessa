@@ -4,7 +4,7 @@ import BirthdayCelebration from '../components/BirthdayCelebration';
 
 export const metadata: Metadata = {
   title: "tessagram",
-  description: "life diary through photos",
+  description: "journey down the memory lane",
 };
 
 export default function RootLayout({
