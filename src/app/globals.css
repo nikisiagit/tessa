@@ -104,6 +104,7 @@ h3 {
 }
 
 .photo-container {
+  display: block;
   width: 100%;
   aspect-ratio: 1 / 1;
   overflow: hidden;
@@ -352,8 +353,8 @@ h3 {
 .photo-interaction-panel.feed-mode {
   box-shadow: none;
   background: transparent;
-  margin-top: 0;
-  max-height: 28vh;
+  margin-top: var(--spacing-sm);
+  max-height: 220px;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -466,7 +467,7 @@ h3 {
   text-align: center;
   color: var(--text-muted);
   font-size: 0.9rem;
-  padding: var(--spacing-md);
+  padding: var(--spacing-sm);
 }
 
 .comment-form {
@@ -484,6 +485,7 @@ h3 {
 .feed-mode .reaction-bar {
   padding: 8px 0;
   border-bottom: none;
+  flex-wrap: wrap;
 }
 
 .feed-mode .comments-list {
