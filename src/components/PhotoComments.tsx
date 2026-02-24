@@ -5,7 +5,7 @@ import { getComments, addComment, type CommentType } from '../app/actions/commen
 
 const EMOJI_LIST = ['❤️', '🔥', '😂', '😍', '👍', '✨'];
 
-export default function PhotoComments({ photoId }: { photoId: string }) {
+export default function PhotoComments({ photoId, isFeed = false }: { photoId: string, isFeed?: boolean }) {
     const [comments, setComments] = useState<CommentType[]>([]);
     const [loading, setLoading] = useState(true);
     const [text, setText] = useState('');
@@ -35,6 +35,7 @@ export default function PhotoComments({ photoId }: { photoId: string }) {
 
     const handleComment = async (e: React.FormEvent) => {
         e.preventDefault();
+        e.stopPropagation();
         if (!text.trim() || isSubmitting) return;
 
         setIsSubmitting(true);
@@ -47,7 +48,7 @@ export default function PhotoComments({ photoId }: { photoId: string }) {
     };
 
     return (
-        <div className="photo-interaction-panel">
+        <div className={`photo-interaction-panel ${isFeed ? 'feed-mode' : ''}`} onClick={(e) => e.stopPropagation()}>
             <div className="reaction-bar">
                 {EMOJI_LIST.map((emoji) => {
                     const count = reactions.filter(r => r.emoji === emoji).length;

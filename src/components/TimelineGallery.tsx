@@ -108,14 +108,17 @@ export default function TimelineGallery({ groupedPhotos, years }: TimelineGaller
                             {visibleGroups[year].map((photo: Photo) => {
                                 const dateObj = new Date(photo.date);
                                 return (
-                                    <div key={photo.id} className="photo-card" onClick={() => setSelectedPhoto(photo)} role="button" tabIndex={0}>
-                                        <LazyMedia photo={photo} year={year} />
-                                        <p className="photo-date">
-                                            {dateObj.toLocaleDateString('en-US', {
-                                                month: 'long',
-                                                day: 'numeric'
-                                            })}
-                                        </p>
+                                    <div key={photo.id} className="photo-card">
+                                        <div onClick={() => setSelectedPhoto(photo)} role="button" tabIndex={0}>
+                                            <LazyMedia photo={photo} year={year} />
+                                            <p className="photo-date">
+                                                {dateObj.toLocaleDateString('en-US', {
+                                                    month: 'long',
+                                                    day: 'numeric'
+                                                })}
+                                            </p>
+                                        </div>
+                                        <PhotoComments photoId={photo.id} isFeed={true} />
                                     </div>
                                 );
                             })}
