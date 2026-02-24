@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import { getPhotos } from '../lib/icloud';
 import TimelineGallery from '../components/TimelineGallery';
+import LiveAge from '../components/LiveAge';
 
 const ICLOUD_ALBUM_ID = process.env.ICLOUD_ALBUM_ID || 'B2BGY8gBYIzSAT';
 
@@ -25,6 +26,7 @@ export default async function Home() {
       <header className="site-header">
         <h1>tessagram</h1>
         <p className="subtitle">journey down the memory lane</p>
+        <LiveAge />
       </header>
 
       <TimelineGallery groupedPhotos={groupedPhotos} years={years} />
