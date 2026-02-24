@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import type { Photo } from '../lib/icloud';
 
 interface TimelineGalleryProps {
@@ -8,8 +8,64 @@ interface TimelineGalleryProps {
     years: number[];
 }
 
+function LazyMedia({ photo, year }: { photo: Photo; year: number }) {
+    const [loaded, setLoaded] = useState(false);
+    const isVideo = photo.thumbnailUrl.includes('.mp4');
+
+    return (
+        <picture className="photo-container">
+            {isVideo ? (
+                <video
+                    src={photo.thumbnailUrl}
+                    controls
+                    muted
+                    playsInline
+                    className={`photo-img interactive-img ${loaded ? 'loaded' : ''}`}
+                    style={{ objectFit: 'cover' }}
+                    onLoadedData={() => setLoaded(true)}
+                />
+            ) : (
+                <img
+                    src={photo.thumbnailUrl}
+                    alt={`Photo taken in ${year}`}
+                    loading="lazy"
+                    className={`photo-img interactive-img ${loaded ? 'loaded' : ''}`}
+                    onLoad={() => setLoaded(true)}
+                />
+            )}
+        </picture>
+    );
+}
+
 export default function TimelineGallery({ groupedPhotos, years }: TimelineGalleryProps) {
     const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
+    const [visibleCount, setVisibleCount] = useState(12);
+
+    const flatPhotos = useMemo(() => {
+        const list: { year: number; photo: Photo }[] = [];
+        for (const y of years) {
+            for (const p of groupedPhotos[y]) {
+                list.push({ year: y, photo: p });
+            }
+        }
+        return list;
+    }, [groupedPhotos, years]);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0].isIntersecting) {
+                    setVisibleCount((prev) => Math.min(prev + 12, flatPhotos.length));
+                }
+            },
+            { rootMargin: '200px', threshold: 0.1 }
+        );
+        const sentinel = document.getElementById('load-more-sentinel');
+        if (sentinel) {
+            observer.observe(sentinel);
+        }
+        return () => observer.disconnect();
+    }, [flatPhotos.length]);
 
     // Close modal when hitting ESC key
     useEffect(() => {
@@ -20,7 +76,6 @@ export default function TimelineGallery({ groupedPhotos, years }: TimelineGaller
         };
         if (selectedPhoto) {
             document.addEventListener('keydown', handleKeyDown);
-            // Disable scrolling on background
             document.body.style.overflow = 'hidden';
         } else {
             document.body.style.overflow = 'auto';
@@ -31,37 +86,29 @@ export default function TimelineGallery({ groupedPhotos, years }: TimelineGaller
         };
     }, [selectedPhoto]);
 
+    const visiblePhotosList = flatPhotos.slice(0, visibleCount);
+    const visibleGroups = visiblePhotosList.reduce((acc, item) => {
+        if (!acc[item.year]) acc[item.year] = [];
+        acc[item.year].push(item.photo);
+        return acc;
+    }, {} as Record<number, Photo[]>);
+
+    const visibleYears = Object.keys(visibleGroups)
+        .map(Number)
+        .sort((a, b) => b - a);
+
     return (
         <>
             <div className="timeline">
-                {years.map((year) => (
+                {visibleYears.map((year) => (
                     <section key={year} className="year-section" id={`year-${year}`}>
                         <h2 className="year-title">{year}</h2>
                         <div className="photo-grid">
-                            {groupedPhotos[year].map((photo: Photo) => {
-                                // Next.js boundary wraps dates as ISO strings depending on environment
+                            {visibleGroups[year].map((photo: Photo) => {
                                 const dateObj = new Date(photo.date);
                                 return (
                                     <div key={photo.id} className="photo-card" onClick={() => setSelectedPhoto(photo)} role="button" tabIndex={0}>
-                                        <picture className="photo-container">
-                                            {photo.thumbnailUrl.includes('.mp4') ? (
-                                                <video
-                                                    src={photo.thumbnailUrl}
-                                                    controls
-                                                    muted
-                                                    playsInline
-                                                    className="photo-img interactive-img"
-                                                    style={{ objectFit: 'cover' }}
-                                                />
-                                            ) : (
-                                                <img
-                                                    src={photo.thumbnailUrl}
-                                                    alt={`Photo taken in ${year}`}
-                                                    loading="lazy"
-                                                    className="photo-img interactive-img"
-                                                />
-                                            )}
-                                        </picture>
+                                        <LazyMedia photo={photo} year={year} />
                                         <p className="photo-date">
                                             {dateObj.toLocaleDateString('en-US', {
                                                 month: 'long',
@@ -75,6 +122,10 @@ export default function TimelineGallery({ groupedPhotos, years }: TimelineGaller
                     </section>
                 ))}
             </div>
+
+            {visibleCount < flatPhotos.length && (
+                <div id="load-more-sentinel" className="loading-sentinel" aria-hidden="true" />
+            )}
 
             {selectedPhoto && (
                 <div className="modal-overlay" onClick={() => setSelectedPhoto(null)}>
