@@ -1,6 +1,7 @@
 export interface Photo {
     id: string;
     url: string;
+    thumbnailUrl: string;
     date: Date;
     width: number;
     height: number;
@@ -57,24 +58,42 @@ export async function getPhotos(streamId: string): Promise<Record<number, Photo[
         if (dKeys.length === 0) continue;
 
         let maxD = p.derivatives[dKeys[0]];
+        let minD = p.derivatives[dKeys[0]];
         for (const k of dKeys) {
-            if (parseInt(p.derivatives[k].width, 10) * parseInt(p.derivatives[k].height, 10) > parseInt(maxD.width, 10) * parseInt(maxD.height, 10)) {
+            const area = parseInt(p.derivatives[k].width, 10) * parseInt(p.derivatives[k].height, 10);
+            const maxArea = parseInt(maxD.width, 10) * parseInt(maxD.height, 10);
+            const minArea = parseInt(minD.width, 10) * parseInt(minD.height, 10);
+
+            if (area > maxArea) {
                 maxD = p.derivatives[k];
+            }
+            if (area < minArea) {
+                minD = p.derivatives[k];
             }
         }
 
         const checksum = maxD.checksum;
         const item = assetData.items[checksum];
-        if (!item) continue;
+
+        const thumbChecksum = minD.checksum;
+        const thumbItem = assetData.items[thumbChecksum];
+
+        if (!item || !thumbItem) continue;
 
         const location = assetData.locations[item.url_location];
         const scheme = location.scheme;
         const hostUrl = location.hosts[0];
         const downloadUrl = `${scheme}://${hostUrl}${item.url_path}`;
 
+        const thumbLocation = assetData.locations[thumbItem.url_location];
+        const thumbScheme = thumbLocation.scheme;
+        const thumbHostUrl = thumbLocation.hosts[0];
+        const downloadThumbUrl = `${thumbScheme}://${thumbHostUrl}${thumbItem.url_path}`;
+
         parsedPhotos.push({
             id: p.photoGuid,
             url: downloadUrl,
+            thumbnailUrl: downloadThumbUrl,
             date: new Date(p.dateCreated),
             width: parseInt(maxD.width),
             height: parseInt(maxD.height),

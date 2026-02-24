@@ -44,9 +44,9 @@ export default function TimelineGallery({ groupedPhotos, years }: TimelineGaller
                                 return (
                                     <div key={photo.id} className="photo-card" onClick={() => setSelectedPhoto(photo)} role="button" tabIndex={0}>
                                         <picture className="photo-container">
-                                            {photo.url.includes('.mp4') ? (
+                                            {photo.thumbnailUrl.includes('.mp4') ? (
                                                 <video
-                                                    src={photo.url}
+                                                    src={photo.thumbnailUrl}
                                                     controls
                                                     muted
                                                     playsInline
@@ -55,7 +55,7 @@ export default function TimelineGallery({ groupedPhotos, years }: TimelineGaller
                                                 />
                                             ) : (
                                                 <img
-                                                    src={photo.url}
+                                                    src={photo.thumbnailUrl}
                                                     alt={`Photo taken in ${year}`}
                                                     loading="lazy"
                                                     className="photo-img interactive-img"
