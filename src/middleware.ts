@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export function proxy(request: NextRequest) {
+export function middleware(request: NextRequest) {
     const isAuth = request.cookies.has('tessa-auth');
     const isLoginPage = request.nextUrl.pathname === '/login';
 
