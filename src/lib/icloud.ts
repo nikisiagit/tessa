@@ -57,25 +57,28 @@ export async function getPhotos(streamId: string): Promise<Record<number, Photo[
         const dKeys = Object.keys(p.derivatives);
         if (dKeys.length === 0) continue;
 
-        let maxD = p.derivatives[dKeys[0]];
-        let minD = p.derivatives[dKeys[0]];
-        for (const k of dKeys) {
-            const area = parseInt(p.derivatives[k].width, 10) * parseInt(p.derivatives[k].height, 10);
-            const maxArea = parseInt(maxD.width, 10) * parseInt(maxD.height, 10);
-            const minArea = parseInt(minD.width, 10) * parseInt(minD.height, 10);
+        const derivativesList = dKeys.map(k => p.derivatives[k]);
+        derivativesList.sort((a, b) => {
+            const areaA = parseInt(a.width, 10) * parseInt(a.height, 10);
+            const areaB = parseInt(b.width, 10) * parseInt(b.height, 10);
+            return areaA - areaB;
+        });
 
-            if (area > maxArea) {
-                maxD = p.derivatives[k];
-            }
-            if (area < minArea) {
-                minD = p.derivatives[k];
+        const maxD = derivativesList[derivativesList.length - 1];
+
+        let thumbD = derivativesList[0];
+        for (const d of derivativesList) {
+            const maxDim = Math.max(parseInt(d.width, 10), parseInt(d.height, 10));
+            if (maxDim >= 600) {
+                thumbD = d;
+                break;
             }
         }
 
         const checksum = maxD.checksum;
         const item = assetData.items[checksum];
 
-        const thumbChecksum = minD.checksum;
+        const thumbChecksum = thumbD.checksum;
         const thumbItem = assetData.items[thumbChecksum];
 
         if (!item || !thumbItem) continue;
