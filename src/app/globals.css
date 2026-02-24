@@ -267,11 +267,12 @@ h3 {
   height: 100vh;
   background-color: rgba(0, 0, 0, 0.9);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
+  overflow-y: auto;
   z-index: 1000;
   animation: fadeIn 0.2s ease-out;
-  padding: var(--spacing-xl);
+  padding: var(--spacing-md) 0;
 }
 
 .modal-close {
@@ -298,6 +299,8 @@ h3 {
   flex-direction: column;
   max-width: 100%;
   max-height: 100%;
+  margin: auto;
+  padding: 0 var(--spacing-md);
 }
 
 .modal-img {

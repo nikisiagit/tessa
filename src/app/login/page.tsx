@@ -9,7 +9,7 @@ export default function LoginPage() {
     return (
         <div className="login-container">
             <div className="login-card">
-                <h1>Private Album</h1>
+                <h1>log in to access tessagram</h1>
                 <p>Please enter the password to view this collection.</p>
 
                 <form action={formAction}>
