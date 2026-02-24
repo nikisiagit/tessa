@@ -5,7 +5,13 @@ import { getComments, addComment, type CommentType } from '../app/actions/commen
 
 const EMOJI_LIST = ['❤️', '🔥', '😂', '😍', '👍', '✨'];
 
-export default function PhotoComments({ photoId, isFeed = false }: { photoId: string, isFeed?: boolean }) {
+interface PhotoCommentsProps {
+    photoId: string;
+    isFeed?: boolean;
+    onCommentsClick?: () => void;
+}
+
+export default function PhotoComments({ photoId, isFeed = false, onCommentsClick }: PhotoCommentsProps) {
     const [comments, setComments] = useState<CommentType[]>([]);
     const [loading, setLoading] = useState(true);
     const [text, setText] = useState('');
@@ -55,24 +61,31 @@ export default function PhotoComments({ photoId, isFeed = false }: { photoId: st
 
     const activeEmojiTypes = activeReactions.map(r => r.emoji);
 
-    // In feed mode, we may want to show the emoji picker only on hover
-    const [pickerVisible, setPickerVisible] = useState(false);
+    // In feed mode, we may want to show the emoji picker only on hover or explicitly open it
+    const [isHovered, setIsHovered] = useState(false);
+    const [isExpanded, setIsExpanded] = useState(false);
+    const showAll = !isFeed || isHovered || isExpanded;
+
+    const handleReactWithClose = (emoji: string) => {
+        handleReact(emoji);
+        setIsExpanded(false);
+    };
 
     return (
         <div
             className={`photo-interaction-panel ${isFeed ? 'feed-mode' : ''}`}
             onClick={(e) => e.stopPropagation()}
-            onMouseEnter={() => setPickerVisible(true)}
-            onMouseLeave={() => setPickerVisible(false)}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => { setIsHovered(false); }}
         >
             <div className="reaction-summary-bar">
                 {/* Active reactions always visible */}
                 <div className="active-reactions">
-                    {(isFeed && !pickerVisible ? activeReactions : EMOJI_LIST.map(e => ({ emoji: e, count: reactions.filter(r => r.emoji === e).length }))).map((r) => (
+                    {(showAll ? EMOJI_LIST.map(e => ({ emoji: e, count: reactions.filter(r => r.emoji === e).length })) : activeReactions).map((r) => (
                         <button
                             key={r.emoji}
                             className={`reaction-btn ${r.count > 0 ? 'has-reactions' : ''}`}
-                            onClick={() => handleReact(r.emoji)}
+                            onClick={() => handleReactWithClose(r.emoji)}
                             disabled={isSubmitting || loading}
                         >
                             <span className="emoji">{r.emoji}</span>
@@ -81,20 +94,28 @@ export default function PhotoComments({ photoId, isFeed = false }: { photoId: st
                     ))}
 
                     {/* The + picker trigger on feed mode */}
-                    {isFeed && !pickerVisible && (
+                    {isFeed && activeEmojiTypes.length < EMOJI_LIST.length && (
                         <button
                             className="reaction-btn hover-trigger"
-                            onClick={(e) => { e.stopPropagation(); setPickerVisible(true); }}
+                            onClick={(e) => { e.stopPropagation(); setIsExpanded(!isExpanded); }}
                         >
-                            <span className="emoji">➕</span>
+                            <span style={{ fontSize: '1.2rem', lineHeight: 1, color: 'var(--text-color)', opacity: 0.7 }}>
+                                {showAll ? '×' : '+'}
+                            </span>
                         </button>
                     )}
                 </div>
 
                 {isFeed && (
-                    <div className="feed-thoughts-counter">
+                    <button
+                        className="feed-thoughts-counter"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            if (onCommentsClick) onCommentsClick();
+                        }}
+                    >
                         <span className="emoji">💬</span> {totalThoughts} {totalThoughts === 1 ? 'thought' : 'thoughts'}
-                    </div>
+                    </button>
                 )}
             </div>
 

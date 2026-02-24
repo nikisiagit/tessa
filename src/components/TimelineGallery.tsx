@@ -116,7 +116,11 @@ export default function TimelineGallery({ groupedPhotos, years }: TimelineGaller
                                                 day: 'numeric'
                                             })}
                                         </p>
-                                        <PhotoComments photoId={photo.id} isFeed={true} />
+                                        <PhotoComments
+                                            photoId={photo.id}
+                                            isFeed={true}
+                                            onCommentsClick={() => setSelectedPhoto(photo)}
+                                        />
                                     </div>
                                 );
                             })}
