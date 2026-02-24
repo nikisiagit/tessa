@@ -420,10 +420,6 @@ h3 {
   border-bottom: none;
 }
 
-.feed-mode .active-reactions {
-  flex-wrap: wrap;
-}
-
 .reaction-btn {
   background: var(--border-color);
   border: 1px solid transparent;
@@ -436,6 +432,7 @@ h3 {
   transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   font-size: 1.1rem;
   animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  flex-shrink: 0;
 }
 
 @keyframes popIn {
