@@ -367,17 +367,41 @@ h3 {
   }
 }
 
-.reaction-bar {
+.reaction-summary-bar {
   display: flex;
-  gap: 8px;
+  justify-content: space-between;
+  align-items: center;
   padding: 12px var(--spacing-md);
   border-bottom: 1px solid var(--border-color);
-  overflow-x: auto;
-  scrollbar-width: none;
+  min-height: 52px;
 }
 
-.reaction-bar::-webkit-scrollbar {
+.active-reactions {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  flex: 1;
+}
+
+.active-reactions::-webkit-scrollbar {
   display: none;
+}
+
+.feed-thoughts-counter {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  margin-left: 12px;
+}
+
+.feed-mode .reaction-summary-bar {
+  padding: 8px 0;
+  border-bottom: none;
+}
+
+.feed-mode .active-reactions {
+  flex-wrap: wrap;
 }
 
 .reaction-btn {
@@ -480,12 +504,6 @@ h3 {
 .feed-mode .comment-form {
   padding: 8px 0;
   border-top: none;
-}
-
-.feed-mode .reaction-bar {
-  padding: 8px 0;
-  border-bottom: none;
-  flex-wrap: wrap;
 }
 
 .feed-mode .comments-list {
