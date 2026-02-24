@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import "./globals.css";
+import './globals.css';
+import BirthdayCelebration from '../components/BirthdayCelebration';
 
 export const metadata: Metadata = {
   title: "tessagram",
@@ -19,6 +20,7 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Cedarville+Cursive&family=Google+Sans:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet" />
       </head>
       <body>
+        <BirthdayCelebration />
         {children}
       </body>
     </html>

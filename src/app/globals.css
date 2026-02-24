@@ -561,3 +561,74 @@ h3 {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* Birthday Animations */
+.birthday-balloons-container {
+  position: fixed;
+  bottom: -100px;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 100;
+  overflow: hidden;
+}
+
+.balloon {
+  position: absolute;
+  font-size: 3rem;
+  animation: floatUp 10s linear infinite;
+  opacity: 0.9;
+}
+
+.balloon-1 {
+  left: 10%;
+  animation-duration: 12s;
+  animation-delay: 0s;
+}
+
+.balloon-2 {
+  left: 30%;
+  animation-duration: 9s;
+  animation-delay: 3s;
+}
+
+.balloon-3 {
+  left: 50%;
+  font-size: 4rem;
+  animation-duration: 15s;
+  animation-delay: 1s;
+}
+
+.balloon-4 {
+  left: 70%;
+  animation-duration: 11s;
+  animation-delay: 2s;
+}
+
+.balloon-5 {
+  left: 85%;
+  animation-duration: 13s;
+  animation-delay: 5s;
+}
+
+.balloon-6 {
+  left: 20%;
+  font-size: 2.5rem;
+  animation-duration: 10s;
+  animation-delay: 6s;
+}
+
+@keyframes floatUp {
+  0% {
+    transform: translateY(100vh) rotate(-10deg);
+  }
+
+  50% {
+    transform: translateY(30vh) rotate(10deg);
+  }
+
+  100% {
+    transform: translateY(-120vh) rotate(-10deg);
+  }
+}
