@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import type { Photo } from '../lib/icloud';
+import PhotoComments from './PhotoComments';
 
 interface TimelineGalleryProps {
     groupedPhotos: Record<number, Photo[]>;
@@ -148,6 +149,7 @@ export default function TimelineGallery({ groupedPhotos, years }: TimelineGaller
                                 className="modal-img"
                             />
                         )}
+                        <PhotoComments photoId={selectedPhoto.id} />
                         <div className="modal-footer">
                             <p className="modal-date">
                                 {new Date(selectedPhoto.date).toLocaleDateString('en-US', {

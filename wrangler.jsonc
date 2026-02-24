@@ -34,5 +34,12 @@
 		// Enable image optimization
 		// see https://opennext.js.org/cloudflare/howtos/image
 		"binding": "IMAGES"
-	}
+	},
+	"kv_namespaces": [
+		{
+			"binding": "COMMENTS",
+			"id": "984051593c6747bba77791ef2ac1dc92",
+			"remote": true
+		}
+	]
 }
