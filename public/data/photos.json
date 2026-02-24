@@ -1,0 +1,50 @@
+[
+  {
+    "id": "photo4.jpg",
+    "url": "/photos/photo4.jpg",
+    "date": "2026-02-21T10:43:22.000Z",
+    "location": {
+      "lat": 50.72253055555556,
+      "lng": -1.9468777777777777,
+      "name": "Lower Parkstone"
+    },
+    "caption": "Memory: photo4",
+    "bbcHeadline": "The best looks at London Fashion Week 2026"
+  },
+  {
+    "id": "photo1.jpg",
+    "url": "/photos/photo1.jpg",
+    "date": "2026-02-21T18:13:59.827Z",
+    "location": {
+      "lat": 51.5074,
+      "lng": -0.1278,
+      "name": "Covent Garden"
+    },
+    "caption": "Memory: photo1",
+    "bbcHeadline": "The best looks at London Fashion Week 2026"
+  },
+  {
+    "id": "photo2.jpg",
+    "url": "/photos/photo2.jpg",
+    "date": "2026-02-21T18:14:00.073Z",
+    "location": {
+      "lat": 51.5074,
+      "lng": -0.1278,
+      "name": "Covent Garden"
+    },
+    "caption": "Memory: photo2",
+    "bbcHeadline": "The best looks at London Fashion Week 2026"
+  },
+  {
+    "id": "photo3.jpg",
+    "url": "/photos/photo3.jpg",
+    "date": "2026-02-21T18:14:00.388Z",
+    "location": {
+      "lat": 51.5074,
+      "lng": -0.1278,
+      "name": "Covent Garden"
+    },
+    "caption": "Memory: photo3",
+    "bbcHeadline": "The best looks at London Fashion Week 2026"
+  }
+]
