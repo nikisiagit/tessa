@@ -67,6 +67,8 @@ h3 {
   letter-spacing: -1px;
   margin-bottom: var(--spacing-sm);
   display: inline-block;
+  padding-bottom: 0.2em;
+  padding-right: 0.2em;
   -webkit-mask-image: linear-gradient(to right, #000 50%, transparent 50%);
   -webkit-mask-size: 200% 100%;
   -webkit-mask-position: 100% 0;
