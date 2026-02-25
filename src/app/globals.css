@@ -66,6 +66,27 @@ h3 {
   font-size: 3rem;
   letter-spacing: -1px;
   margin-bottom: var(--spacing-sm);
+  display: inline-block;
+  -webkit-mask-image: linear-gradient(to right, #000 50%, transparent 50%);
+  -webkit-mask-size: 200% 100%;
+  -webkit-mask-position: 100% 0;
+  mask-image: linear-gradient(to right, #000 50%, transparent 50%);
+  mask-size: 200% 100%;
+  mask-position: 100% 0;
+  animation: writeText 2.5s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+  animation-delay: 0.3s;
+}
+
+@keyframes writeText {
+  0% {
+    -webkit-mask-position: 100% 0;
+    mask-position: 100% 0;
+  }
+
+  100% {
+    -webkit-mask-position: 0 0;
+    mask-position: 0 0;
+  }
 }
 
 .site-header .subtitle {
