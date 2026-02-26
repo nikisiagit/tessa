@@ -50,9 +50,15 @@ h3 {
 
 /* Layout */
 .container {
-  max-width: 900px;
+  max-width: 100%;
   margin: 0 auto;
-  padding: var(--spacing-xl) var(--spacing-md);
+  padding: var(--spacing-xl) var(--spacing-xl);
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: var(--spacing-xl) var(--spacing-sm);
+  }
 }
 
 .site-header {
@@ -116,8 +122,14 @@ h3 {
 
 .photo-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: 1fr;
   gap: var(--spacing-lg);
+}
+
+@media (min-width: 600px) {
+  .photo-grid {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  }
 }
 
 .photo-card {
