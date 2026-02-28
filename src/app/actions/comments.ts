@@ -1,6 +1,7 @@
 'use server';
 
 import { getCloudflareContext } from '@opennextjs/cloudflare';
+import { unstable_noStore as noStore, revalidatePath } from 'next/cache';
 
 export type CommentType = {
     id: string;
@@ -11,6 +12,7 @@ export type CommentType = {
 };
 
 export async function getComments(photoId: string): Promise<CommentType[]> {
+    noStore();
     try {
         const { env } = getCloudflareContext() as any;
         if (!env || !env.COMMENTS) return [];
@@ -25,6 +27,7 @@ export async function getComments(photoId: string): Promise<CommentType[]> {
 }
 
 export async function addComment(photoId: string, payload: Omit<CommentType, 'id' | 'date'>) {
+    noStore();
     try {
         const { env } = getCloudflareContext() as any;
         if (!env || !env.COMMENTS) return { success: false, error: 'KV not configured' };
@@ -40,6 +43,7 @@ export async function addComment(photoId: string, payload: Omit<CommentType, 'id
         current.push(newEntry);
 
         await env.COMMENTS.put(`photo:${photoId}`, JSON.stringify(current));
+        revalidatePath('/');
         return { success: true, updated: current };
     } catch (e) {
         console.error('Failed to add comment', e);
