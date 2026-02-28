@@ -20,12 +20,19 @@ export default function PhotoComments({ photoId, isFeed = false, onCommentsClick
     useEffect(() => {
         let active = true;
         setLoading(true);
-        getComments(photoId).then((res) => {
-            if (active) {
-                setComments(res);
-                setLoading(false);
-            }
-        });
+        getComments(photoId)
+            .then((res) => {
+                if (active) {
+                    setComments(res || []);
+                    setLoading(false);
+                }
+            })
+            .catch((err) => {
+                console.error('Action failed:', err);
+                if (active) {
+                    setLoading(false);
+                }
+            });
         return () => { active = false; };
     }, [photoId]);
 
