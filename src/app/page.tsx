@@ -20,9 +20,14 @@ export default async function Home() {
 
   // Calculate distinct available months for the archive navigation
   const archiveSet = new Set<string>();
+  const currentMonthKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+
   allPhotos.forEach(p => {
     const d = new Date(p.date);
-    archiveSet.add(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    if (key !== currentMonthKey) {
+      archiveSet.add(key);
+    }
   });
 
   // Sort archives newest first (e.g. 2026-02, 2026-01 ...)
