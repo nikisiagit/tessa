@@ -7,7 +7,7 @@ export interface Photo {
     height: number;
 }
 
-export async function getPhotos(streamId: string): Promise<Record<number, Photo[]>> {
+export async function getPhotos(streamId: string): Promise<Photo[]> {
     let url = `https://p01-sharedstreams.icloud.com/${streamId}/sharedstreams/webstream`;
     let res = await fetch(url, {
         method: 'POST',
@@ -36,7 +36,7 @@ export async function getPhotos(streamId: string): Promise<Record<number, Photo[
     }
 
     const photos = data.photos || [];
-    if (photos.length === 0) return {};
+    if (photos.length === 0) return [];
 
     const photoGuids = photos.map((p: any) => p.photoGuid);
 
@@ -106,15 +106,5 @@ export async function getPhotos(streamId: string): Promise<Record<number, Photo[
     // Sort photos conceptually from oldest to newest
     parsedPhotos.sort((a, b) => a.date.getTime() - b.date.getTime());
 
-    // Group by year
-    const grouped: Record<number, Photo[]> = {};
-    for (const photo of parsedPhotos) {
-        const year = photo.date.getFullYear();
-        if (!grouped[year]) {
-            grouped[year] = [];
-        }
-        grouped[year].push(photo);
-    }
-
-    return grouped;
+    return parsedPhotos;
 }

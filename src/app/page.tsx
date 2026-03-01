@@ -1,25 +1,32 @@
-import Image from 'next/image';
-import { getPhotos } from '../lib/icloud';
+import Link from 'next/link';
+import { getPhotos, Photo } from '../lib/icloud';
 import TimelineGallery from '../components/TimelineGallery';
 import LiveAge from '../components/LiveAge';
 
 const ICLOUD_ALBUM_ID = process.env.ICLOUD_ALBUM_ID || 'B2BGY8gBYIzSAT';
 
 export default async function Home() {
-  const groupedPhotos = await getPhotos(ICLOUD_ALBUM_ID);
+  const allPhotos = await getPhotos(ICLOUD_ALBUM_ID);
 
-  // Get years in descending order
-  const years = Object.keys(groupedPhotos)
-    .map(Number)
-    .sort((a, b) => b - a);
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth(); // 0-indexed
 
-  if (years.length === 0) {
-    return (
-      <main className="container empty-state">
-        <p>No photos found in this album.</p>
-      </main>
-    );
-  }
+  // Filter for ONLY the current month
+  const currentMonthPhotos = allPhotos.filter((p: Photo) => {
+    const d = new Date(p.date);
+    return d.getFullYear() === currentYear && d.getMonth() === currentMonth;
+  });
+
+  // Calculate distinct available months for the archive navigation
+  const archiveSet = new Set<string>();
+  allPhotos.forEach(p => {
+    const d = new Date(p.date);
+    archiveSet.add(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+  });
+
+  // Sort archives newest first (e.g. 2026-02, 2026-01 ...)
+  const archives = Array.from(archiveSet).sort((a, b) => b.localeCompare(a));
 
   return (
     <main className="container">
@@ -29,7 +36,33 @@ export default async function Home() {
         <LiveAge />
       </header>
 
-      <TimelineGallery groupedPhotos={groupedPhotos} years={years} />
+      {currentMonthPhotos.length === 0 ? (
+        <div className="empty-state">
+          <p>No new photos yet this month.</p>
+        </div>
+      ) : (
+        <TimelineGallery photos={currentMonthPhotos} />
+      )}
+
+      {archives.length > 0 && (
+        <div className="archive-navigation" style={{ marginTop: '64px', borderTop: '1px solid var(--border-color)', paddingTop: '32px' }}>
+          <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '2rem', marginBottom: '16px', color: 'var(--text-muted)' }}>Archives</h2>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}>
+            {archives.map(archiveKey => {
+              const [y, m] = archiveKey.split('-');
+              const dateObj = new Date(parseInt(y), parseInt(m) - 1);
+              const label = dateObj.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+              return (
+                <Link key={archiveKey} href={`/archive/${y}/${m}`} style={{
+                  padding: '8px 16px', borderRadius: '20px', background: 'var(--border-color)', color: 'var(--text-color)', textDecoration: 'none', fontSize: '0.9rem'
+                }}>
+                  {label}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </main>
   );
 }

@@ -5,11 +5,10 @@ import type { Photo } from '../lib/icloud';
 import PhotoComments from './PhotoComments';
 
 interface TimelineGalleryProps {
-    groupedPhotos: Record<number, Photo[]>;
-    years: number[];
+    photos: Photo[];
 }
 
-function LazyMedia({ photo, year }: { photo: Photo; year: number }) {
+function LazyMedia({ photo, title }: { photo: Photo; title: string }) {
     const [loaded, setLoaded] = useState(false);
     const isVideo = photo.thumbnailUrl.includes('.mp4');
 
@@ -28,7 +27,7 @@ function LazyMedia({ photo, year }: { photo: Photo; year: number }) {
             ) : (
                 <img
                     src={photo.thumbnailUrl}
-                    alt={`Photo taken in ${year}`}
+                    alt={`Photo from ${title}`}
                     loading="lazy"
                     className={`photo-img interactive-img ${loaded ? 'loaded' : ''}`}
                     onLoad={() => setLoaded(true)}
@@ -38,25 +37,15 @@ function LazyMedia({ photo, year }: { photo: Photo; year: number }) {
     );
 }
 
-export default function TimelineGallery({ groupedPhotos, years }: TimelineGalleryProps) {
+export default function TimelineGallery({ photos }: TimelineGalleryProps) {
     const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
     const [visibleCount, setVisibleCount] = useState(12);
-
-    const flatPhotos = useMemo(() => {
-        const list: { year: number; photo: Photo }[] = [];
-        for (const y of years) {
-            for (const p of groupedPhotos[y]) {
-                list.push({ year: y, photo: p });
-            }
-        }
-        return list;
-    }, [groupedPhotos, years]);
 
     useEffect(() => {
         const observer = new IntersectionObserver(
             (entries) => {
                 if (entries[0].isIntersecting) {
-                    setVisibleCount((prev) => Math.min(prev + 12, flatPhotos.length));
+                    setVisibleCount((prev) => Math.min(prev + 12, photos.length));
                 }
             },
             { rootMargin: '200px', threshold: 0.1 }
@@ -66,7 +55,7 @@ export default function TimelineGallery({ groupedPhotos, years }: TimelineGaller
             observer.observe(sentinel);
         }
         return () => observer.disconnect();
-    }, [flatPhotos.length]);
+    }, [photos.length]);
 
     // Close modal when hitting ESC key
     useEffect(() => {
@@ -87,49 +76,58 @@ export default function TimelineGallery({ groupedPhotos, years }: TimelineGaller
         };
     }, [selectedPhoto]);
 
-    const visiblePhotosList = flatPhotos.slice(0, visibleCount);
-    const visibleGroups = visiblePhotosList.reduce((acc, item) => {
-        if (!acc[item.year]) acc[item.year] = [];
-        acc[item.year].push(item.photo);
-        return acc;
-    }, {} as Record<number, Photo[]>);
+    const visiblePhotosList = photos.slice(0, visibleCount);
 
-    const visibleYears = Object.keys(visibleGroups)
-        .map(Number)
-        .sort((a, b) => b - a);
+    // Group by YYYY-MM
+    const visibleGroups = visiblePhotosList.reduce((acc, photo) => {
+        const d = new Date(photo.date);
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        if (!acc[key]) acc[key] = [];
+        acc[key].push(photo);
+        return acc;
+    }, {} as Record<string, Photo[]>);
+
+    // Sort groups descending (newest month first)
+    const sortedGroupKeys = Object.keys(visibleGroups).sort((a, b) => b.localeCompare(a));
 
     return (
         <>
             <div className="timeline">
-                {visibleYears.map((year) => (
-                    <section key={year} className="year-section" id={`year-${year}`}>
-                        <h2 className="year-title">{year}</h2>
-                        <div className="photo-grid">
-                            {visibleGroups[year].map((photo: Photo) => {
-                                const dateObj = new Date(photo.date);
-                                return (
-                                    <div key={photo.id} className="photo-card" onClick={() => setSelectedPhoto(photo)} role="button" tabIndex={0}>
-                                        <LazyMedia photo={photo} year={year} />
-                                        <p className="photo-date">
-                                            {dateObj.toLocaleDateString('en-US', {
-                                                month: 'long',
-                                                day: 'numeric'
-                                            })}
-                                        </p>
-                                        <PhotoComments
-                                            photoId={photo.id}
-                                            isFeed={true}
-                                            onCommentsClick={() => setSelectedPhoto(photo)}
-                                        />
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </section>
-                ))}
+                {sortedGroupKeys.map((monthKey) => {
+                    const [year, month] = monthKey.split('-');
+                    const dateObj = new Date(parseInt(year), parseInt(month) - 1);
+                    const groupTitle = dateObj.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+                    return (
+                        <section key={monthKey} className="year-section" id={`month-${monthKey}`}>
+                            <h2 className="year-title">{groupTitle}</h2>
+                            <div className="photo-grid">
+                                {visibleGroups[monthKey].map((photo: Photo) => {
+                                    const pDate = new Date(photo.date);
+                                    return (
+                                        <div key={photo.id} className="photo-card" onClick={() => setSelectedPhoto(photo)} role="button" tabIndex={0}>
+                                            <LazyMedia photo={photo} title={groupTitle} />
+                                            <p className="photo-date">
+                                                {pDate.toLocaleDateString('en-US', {
+                                                    month: 'long',
+                                                    day: 'numeric'
+                                                })}
+                                            </p>
+                                            <PhotoComments
+                                                photoId={photo.id}
+                                                isFeed={true}
+                                                onCommentsClick={() => setSelectedPhoto(photo)}
+                                            />
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </section>
+                    );
+                })}
             </div>
 
-            {visibleCount < flatPhotos.length && (
+            {visibleCount < photos.length && (
                 <div id="load-more-sentinel" className="loading-sentinel" aria-hidden="true" />
             )}
 
