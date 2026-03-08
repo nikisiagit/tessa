@@ -5,6 +5,9 @@ import { getComments, addComment, type CommentType } from '../app/actions/commen
 
 const EMOJI_LIST = ['❤️', '🔥', '😂', '😍', '👍', '✨'];
 
+// Simple cross-instance client-side cache to survive modal unmounts
+const localCommentsCache: Record<string, CommentType[]> = {};
+
 interface PhotoCommentsProps {
     photoId: string;
     isFeed?: boolean;
@@ -12,18 +15,25 @@ interface PhotoCommentsProps {
 }
 
 export default function PhotoComments({ photoId, isFeed = false, onCommentsClick }: PhotoCommentsProps) {
-    const [comments, setComments] = useState<CommentType[]>([]);
-    const [loading, setLoading] = useState(true);
+    // Initialize with cached comments if available to avoid flicker/stale data
+    const [comments, setComments] = useState<CommentType[]>(() => localCommentsCache[photoId] || []);
+    const [loading, setLoading] = useState(!localCommentsCache[photoId]);
     const [text, setText] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         let active = true;
-        setLoading(true);
+        setLoading(!localCommentsCache[photoId]);
         getComments(photoId)
             .then((res) => {
                 if (active) {
-                    setComments(res || []);
+                    const fetched = res || [];
+                    // Simple approach: if our local cache has MORE comments, we might have just added one
+                    // and KV is eventually consistent. Prefer local cache if it is larger.
+                    if (!localCommentsCache[photoId] || fetched.length >= localCommentsCache[photoId].length) {
+                        localCommentsCache[photoId] = fetched;
+                        setComments(fetched);
+                    }
                     setLoading(false);
                 }
             })
@@ -39,10 +49,31 @@ export default function PhotoComments({ photoId, isFeed = false, onCommentsClick
     const reactions = comments.filter(c => c.type === 'reaction');
     const textComments = comments.filter(c => c.type === 'comment');
 
+    // Synchronize comments across instances for the same photo
+    useEffect(() => {
+        const handleUpdate = (e: Event) => {
+            const customEvent = e as CustomEvent;
+            if (customEvent.detail.photoId === photoId) {
+                localCommentsCache[photoId] = customEvent.detail.comments;
+                setComments(customEvent.detail.comments);
+            }
+        };
+        window.addEventListener('photo-comments-updated', handleUpdate);
+        return () => window.removeEventListener('photo-comments-updated', handleUpdate);
+    }, [photoId]);
+
     const handleReact = async (emoji: string) => {
         setIsSubmitting(true);
         const res = await addComment(photoId, { type: 'reaction', emoji });
-        if (res.success && res.updated) setComments(res.updated);
+        if (res.success && res.updated) {
+            localCommentsCache[photoId] = res.updated;
+            setComments(res.updated);
+            if (typeof window !== 'undefined') {
+                window.dispatchEvent(new CustomEvent('photo-comments-updated', {
+                    detail: { photoId, comments: res.updated }
+                }));
+            }
+        }
         setIsSubmitting(false);
     };
 
@@ -54,8 +85,14 @@ export default function PhotoComments({ photoId, isFeed = false, onCommentsClick
         setIsSubmitting(true);
         const res = await addComment(photoId, { type: 'comment', text: text.trim() });
         if (res.success && res.updated) {
+            localCommentsCache[photoId] = res.updated;
             setComments(res.updated);
             setText('');
+            if (typeof window !== 'undefined') {
+                window.dispatchEvent(new CustomEvent('photo-comments-updated', {
+                    detail: { photoId, comments: res.updated }
+                }));
+            }
         }
         setIsSubmitting(false);
     };
