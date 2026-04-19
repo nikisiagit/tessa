@@ -19,7 +19,18 @@ export default function PhotoComments({ photoId, isFeed = false, onCommentsClick
     const [comments, setComments] = useState<CommentType[]>(() => localCommentsCache[photoId] || []);
     const [loading, setLoading] = useState(!localCommentsCache[photoId]);
     const [text, setText] = useState('');
+    const [name, setName] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    useEffect(() => {
+        const storedName = localStorage.getItem('tessa_visitor_name');
+        if (storedName) setName(storedName);
+    }, []);
+
+    const handleNameChange = (newName: string) => {
+        setName(newName);
+        localStorage.setItem('tessa_visitor_name', newName);
+    };
 
     useEffect(() => {
         let active = true;
@@ -63,8 +74,16 @@ export default function PhotoComments({ photoId, isFeed = false, onCommentsClick
     }, [photoId]);
 
     const handleReact = async (emoji: string) => {
+        let currentName = name;
+        if (!currentName) {
+            const promptName = window.prompt("Please enter your name to react:");
+            if (!promptName || !promptName.trim()) return;
+            currentName = promptName.trim();
+            handleNameChange(currentName);
+        }
+
         setIsSubmitting(true);
-        const res = await addComment(photoId, { type: 'reaction', emoji });
+        const res = await addComment(photoId, { type: 'reaction', emoji, name: currentName });
         if (res.success && res.updated) {
             localCommentsCache[photoId] = res.updated;
             setComments(res.updated);
@@ -82,8 +101,16 @@ export default function PhotoComments({ photoId, isFeed = false, onCommentsClick
         e.stopPropagation();
         if (!text.trim() || isSubmitting) return;
 
+        let currentName = name;
+        if (!currentName) {
+            const promptName = window.prompt("Please enter your name to post a thought:");
+            if (!promptName || !promptName.trim()) return;
+            currentName = promptName.trim();
+            handleNameChange(currentName);
+        }
+
         setIsSubmitting(true);
-        const res = await addComment(photoId, { type: 'comment', text: text.trim() });
+        const res = await addComment(photoId, { type: 'comment', text: text.trim(), name: currentName });
         if (res.success && res.updated) {
             localCommentsCache[photoId] = res.updated;
             setComments(res.updated);
@@ -100,7 +127,8 @@ export default function PhotoComments({ photoId, isFeed = false, onCommentsClick
     const totalThoughts = textComments.length;
     const activeReactions = EMOJI_LIST.map(emoji => ({
         emoji,
-        count: reactions.filter(r => r.emoji === emoji).length
+        count: reactions.filter(r => r.emoji === emoji).length,
+        reacts: reactions.filter(r => r.emoji === emoji)
     })).filter(r => r.count > 0);
 
     const activeEmojiTypes = activeReactions.map(r => r.emoji);
@@ -125,17 +153,20 @@ export default function PhotoComments({ photoId, isFeed = false, onCommentsClick
             <div className="reaction-summary-bar">
                 {/* Active reactions always visible */}
                 <div className="active-reactions">
-                    {(showAll ? EMOJI_LIST.map(e => ({ emoji: e, count: reactions.filter(r => r.emoji === e).length })) : activeReactions).map((r) => (
+                    {(showAll ? EMOJI_LIST.map(e => ({ emoji: e, count: reactions.filter(r => r.emoji === e).length, reacts: reactions.filter(r => r.emoji === e) })) : activeReactions).map((r) => {
+                        const title = r.reacts?.filter(rx => rx.name).map(rx => rx.name).join(', ');
+                        return (
                         <button
                             key={r.emoji}
                             className={`reaction-btn ${r.count > 0 ? 'has-reactions' : ''}`}
                             onClick={() => handleReactWithClose(r.emoji)}
                             disabled={isSubmitting || loading}
+                            title={title || ''}
                         >
                             <span className="emoji">{r.emoji}</span>
                             {r.count > 0 && <span className="count">{r.count}</span>}
                         </button>
-                    ))}
+                    )})}
 
                     {/* The + picker trigger on feed mode */}
                     {isFeed && activeEmojiTypes.length < EMOJI_LIST.length && (
@@ -176,6 +207,7 @@ export default function PhotoComments({ photoId, isFeed = false, onCommentsClick
                             ) : (
                                 textComments.map(c => (
                                     <div key={c.id} className="comment-bubble">
+                                        {c.name && <span className="comment-name" style={{ fontWeight: 600, fontSize: '0.8rem', display: 'block', marginBottom: '2px' }}>{c.name}</span>}
                                         <p className="comment-text">{c.text}</p>
                                         <span className="comment-date">
                                             {new Date(c.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
@@ -186,6 +218,14 @@ export default function PhotoComments({ photoId, isFeed = false, onCommentsClick
                         </div>
                     )}
                     <form className="comment-form" onSubmit={handleComment}>
+                        <input
+                            type="text"
+                            placeholder="Your name"
+                            value={name}
+                            onChange={(e) => handleNameChange(e.target.value)}
+                            disabled={isSubmitting || loading}
+                            style={{ maxWidth: '120px' }}
+                        />
                         <input
                             type="text"
                             placeholder="Add your thoughts..."

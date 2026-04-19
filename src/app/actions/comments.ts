@@ -7,6 +7,7 @@ export type CommentType = {
     type: 'comment' | 'reaction';
     text?: string;
     emoji?: string;
+    name?: string;
     date: string;
 };
 
