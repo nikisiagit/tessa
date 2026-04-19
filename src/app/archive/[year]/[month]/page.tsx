@@ -12,10 +12,12 @@ export default async function ArchivePage({ params }: { params: { year: string, 
     const targetYear = parseInt(year, 10);
     const targetMonth = parseInt(month, 10) - 1; // 0-indexed month
 
-    const archivedPhotos = allPhotos.filter((p: Photo) => {
-        const d = new Date(p.date);
-        return d.getFullYear() === targetYear && d.getMonth() === targetMonth;
-    });
+    const archivedPhotos = allPhotos
+        .filter((p: Photo) => {
+            const d = new Date(p.date);
+            return d.getFullYear() === targetYear && d.getMonth() === targetMonth;
+        })
+        .sort((a: Photo, b: Photo) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     const dateObj = new Date(targetYear, targetMonth);
     const headerTitle = dateObj.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });

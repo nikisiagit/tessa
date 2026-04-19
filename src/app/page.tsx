@@ -12,11 +12,13 @@ export default async function Home() {
   const currentYear = now.getFullYear();
   const currentMonth = now.getMonth(); // 0-indexed
 
-  // Filter for ONLY the current month
-  const currentMonthPhotos = allPhotos.filter((p: Photo) => {
-    const d = new Date(p.date);
-    return d.getFullYear() === currentYear && d.getMonth() === currentMonth;
-  });
+  // Filter for ONLY the current month and sort most recent first
+  const currentMonthPhotos = allPhotos
+    .filter((p: Photo) => {
+      const d = new Date(p.date);
+      return d.getFullYear() === currentYear && d.getMonth() === currentMonth;
+    })
+    .sort((a: Photo, b: Photo) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   // Calculate distinct available months for the archive navigation
   const archiveSet = new Set<string>();
