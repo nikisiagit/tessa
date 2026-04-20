@@ -74,4 +74,4 @@ export default async function Home() {
   );
 }
 
-export const revalidate = 3600; // fetch at most once per hour
+export const revalidate = 0; // temporarily disable cache to force update
