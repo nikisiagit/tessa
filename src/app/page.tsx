@@ -41,6 +41,7 @@ export default async function Home() {
         <h1>tessagram</h1>
         <p className="subtitle">journey down the memory lane</p>
         <LiveAge />
+        <Link href="/timelapse" className="timelapse-link">Watch her grow</Link>
       </header>
 
       {currentMonthPhotos.length === 0 ? (
