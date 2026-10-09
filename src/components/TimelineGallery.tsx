@@ -104,15 +104,16 @@ export default function TimelineGallery({ photos }: TimelineGalleryProps) {
                             <div className="photo-grid">
                                 {visibleGroups[monthKey].map((photo: Photo) => {
                                     const pDate = new Date(photo.date);
+                                    const frameDate = pDate.toLocaleDateString('en-US', {
+                                        month: 'long',
+                                        day: 'numeric',
+                                    });
                                     return (
                                         <div key={photo.id} className="photo-card" onClick={() => setSelectedPhoto(photo)} role="button" tabIndex={0}>
-                                            <LazyMedia photo={photo} title={groupTitle} />
-                                            <p className="photo-date">
-                                                {pDate.toLocaleDateString('en-US', {
-                                                    month: 'long',
-                                                    day: 'numeric'
-                                                })}
-                                            </p>
+                                            <div className="polaroid">
+                                                <LazyMedia photo={photo} title={groupTitle} />
+                                                <p className="photo-date">{frameDate}</p>
+                                            </div>
                                             <PhotoComments
                                                 photoId={photo.id}
                                                 isFeed={true}
@@ -137,24 +138,23 @@ export default function TimelineGallery({ photos }: TimelineGalleryProps) {
                         &times;
                     </button>
                     <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                        {selectedPhoto.url.includes('.mp4') ? (
-                            <video
-                                src={selectedPhoto.url}
-                                controls
-                                playsInline
-                                className="modal-img"
-                                autoPlay
-                            />
-                        ) : (
-                            <img
-                                src={selectedPhoto.url}
-                                alt="Enlarged view"
-                                className="modal-img"
-                            />
-                        )}
-                        <PhotoComments photoId={selectedPhoto.id} />
-                        <div className="modal-footer">
-                            <p className="modal-date">
+                        <div className="polaroid polaroid-modal">
+                            {selectedPhoto.url.includes('.mp4') ? (
+                                <video
+                                    src={selectedPhoto.url}
+                                    controls
+                                    playsInline
+                                    className="modal-img"
+                                    autoPlay
+                                />
+                            ) : (
+                                <img
+                                    src={selectedPhoto.url}
+                                    alt="Enlarged view"
+                                    className="modal-img"
+                                />
+                            )}
+                            <p className="photo-date">
                                 {new Date(selectedPhoto.date).toLocaleDateString('en-US', {
                                     year: 'numeric',
                                     month: 'long',
@@ -162,6 +162,7 @@ export default function TimelineGallery({ photos }: TimelineGalleryProps) {
                                 })}
                             </p>
                         </div>
+                        <PhotoComments photoId={selectedPhoto.id} />
                     </div>
                 </div>
             )}
