@@ -38,8 +38,7 @@
 	"kv_namespaces": [
 		{
 			"binding": "COMMENTS",
-			"id": "984051593c6747bba77791ef2ac1dc92",
-			"remote": true
+			"id": "984051593c6747bba77791ef2ac1dc92"
 		}
 	]
 }
